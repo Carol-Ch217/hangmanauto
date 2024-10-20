@@ -1,0 +1,67 @@
+import csv
+
+romanian_alphabet = "AĂÂBCDEFGHIÎJKLMNOPRSȘTUVȚZ"
+
+
+def load_words_from_csv(file_path):
+    words_data = []
+    with open(file_path, mode='r', encoding='utf-8') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            words_data.append(row)
+    return words_data
+
+
+def select_word_by_number(words_data, number):
+    for cuvant in words_data:
+        if cuvant[0] == str(number):
+            return cuvant[1], cuvant[2]
+    return None, None
+
+
+def play_hangman_game(full_word):
+    incorrect_guesses = 0
+    total_guesses = 0
+    guessed_letters = set()
+    max_incorrect_guesses = 1200
+    full_word_upper = full_word.upper()
+
+    while incorrect_guesses < max_incorrect_guesses:
+        available_letters = [letter for letter in romanian_alphabet if letter not in guessed_letters]
+        letters_to_guess = [letter for letter in available_letters if letter in full_word_upper]
+
+        if not letters_to_guess:
+            break
+
+        letter_to_guess = letters_to_guess[0]
+        total_guesses += 1
+
+        if letter_to_guess in full_word_upper:
+            guessed_letters.add(letter_to_guess)
+        else:
+            incorrect_guesses += 1
+
+        if all(char in guessed_letters for char in full_word_upper):
+            break
+
+    return total_guesses
+
+
+def main():
+    file_path = 'cuvinte_de_verificat.csv'
+    words_data = load_words_from_csv(file_path)
+
+    total_attempts = 0
+
+    for number in range(1, len(words_data) + 1):
+        partial_word, full_word = select_word_by_number(words_data, number)
+        if full_word:
+            total_guesses = play_hangman_game(full_word)
+            total_attempts += total_guesses
+            print(f"Cuvântul: '{full_word}' a fost ghicit în {total_guesses} încercări.")
+
+    print(f"Număr total de încercări: {total_attempts}")
+
+
+if __name__ == "__main__":
+    main()
